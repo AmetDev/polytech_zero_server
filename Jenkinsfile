@@ -13,7 +13,7 @@ pipeline {
                 sh '''
                     sudo pm2 stop server || true
                     sudo pm2 delete server || true
-                    sudo API_URL=$API_URL pm2 start server.js --name server
+                    sudo pm2 start server.js --name server
                 '''
             }
         }
