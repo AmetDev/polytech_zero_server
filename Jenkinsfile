@@ -15,6 +15,7 @@ pipeline {
         stage('Run backend with PM2') {
             steps {
                 sh '''
+                    npm i ci
                     sudo pm2 stop server || true
                     sudo pm2 delete server || true
 
