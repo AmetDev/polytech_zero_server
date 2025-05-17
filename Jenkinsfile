@@ -1,19 +1,30 @@
 pipeline {
     agent any
 
+    environment {
+        CI = 'true'
+    }
+
     stages {
-        stage('Show env') {
+        stage('Install dependencies') {
             steps {
-                sh 'echo $NEXT_PUBLIC_SERVER_URL'
+                sh 'npm install'
             }
         }
 
-        stage('Run app') {
+        stage('Run backend with PM2') {
             steps {
                 sh '''
                     sudo pm2 stop server || true
                     sudo pm2 delete server || true
-                    sudo pm2 start server.js --name server
+
+                    sudo MONGO_URI=$MONGO_URI \
+                         PORT=$PORT \
+                         SECRET=$SECRET \
+                         EMAIL=$EMAIL \
+                         PASS=$PASS \
+                         CI=true \
+                         pm2 start server.js --name server
                 '''
             }
         }
