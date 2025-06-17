@@ -9,6 +9,7 @@ import morgan from "morgan";
 import multer from "multer";
 import cron from "node-cron";
 import path from "path";
+import fs from "fs";
 import Image from "./models/Image.js";
 import pdfModel from "./models/PdfFile.js";
 import dormitoryRouter from "./routes/DormitoryRoutes.js";
@@ -21,18 +22,19 @@ import scheduleRouter from "./routes/ScheduleRoutes.js";
 import specialityRouter from "./routes/SpecialtiesRoutes.js";
 import userRouter from "./routes/UserRoutes.js";
 import AdmissionRouter from "./routes/Admission.js";
-
 import checkAuth from "./utils/checkAuth.js";
 import checkUserIsAdmin from "./utils/checkUserIsAdmin.js";
+
 dotenv.config({ path: "./.env" });
+
 const app = express();
 
 /* CONSTANTS */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
-// const upload = multer({ dest: 'uploads/' })
-/* MIDDLEWARES */
+const UPLOADS_DIR = "/home/jenkins";
 
+/* MIDDLEWARES */
 app.use(express.json({ limit: "50mb" }));
 app.use(cors());
 app.use(helmet());
@@ -47,22 +49,25 @@ app.use(
   })
 );
 
+/* MULTER CONFIG */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Uploads will be stored in the 'uploads' directory
+    cb(null, UPLOADS_DIR);
   },
-
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
-
 const upload = multer({ storage: storage });
 
-// Serve the HTML page with a form for image upload
+/* STATIC FILES */
+app.use("/uploads", express.static(UPLOADS_DIR));
+
+/* ROUTES */
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(path.resolve(), "index.html"));
 });
+
 app.post(
   "/uploadpdf",
   checkAuth,
@@ -72,17 +77,12 @@ app.post(
     try {
       if (req.file) {
         const pdfUrl = `/uploads/${req.file.filename}`;
-
-        // Save PDF file details to MongoDB
-
         const newPdf = new pdfModel({
           filename: req.file.filename,
           path: pdfUrl,
         });
-
         await newPdf.save();
-
-        res.json({ pdflink: pdfUrl }); // Only return the PDF file URL
+        res.json({ pdflink: pdfUrl });
       } else {
         res.status(400).send("No PDF file provided");
       }
@@ -92,7 +92,7 @@ app.post(
     }
   }
 );
-// Handle image upload
+
 app.post(
   "/upload",
   checkAuth,
@@ -106,10 +106,8 @@ app.post(
           filename: req.file.filename,
           path: imageUrl,
         });
-
         await newImage.save();
-
-        res.json({ imagelink: imageUrl }); // Only return the image URL
+        res.json({ imagelink: imageUrl });
       } else {
         res.status(400).send("No image file provided");
       }
@@ -120,9 +118,6 @@ app.post(
   }
 );
 
-// Set up static file serving for uploaded images
-app.use("/uploads", express.static("uploads"));
-/* ROUTES */
 app.use("/auth", userRouter);
 app.use("/speciality", specialityRouter);
 app.use("/post", postRouter);
@@ -134,6 +129,7 @@ app.use("/linker", LinkHeader);
 app.use("/files", SaveFilesRouter);
 app.use("/admission", AdmissionRouter);
 
+/* DELETE OLD IMAGES FUNCTION */
 const client = new MongoClient(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -142,37 +138,29 @@ const client = new MongoClient(MONGO_URI, {
 async function deleteOldImages(daysThreshold = 365) {
   try {
     await client.connect();
-
     const database = client.db("test");
     const collection = database.collection("scheduleimages");
 
-    const currentTimestamp = new Date();
-    const thresholdTimestamp = new Date(
-      currentTimestamp - daysThreshold * 24 * 60 * 60 * 1000
-    );
-
-    // Находим все записи, у которых дата загрузки меньше пороговой
+    const thresholdTimestamp = new Date(Date.now() - daysThreshold * 24 * 60 * 60 * 1000);
     const oldImages = await collection
       .find({ upload_date: { $lt: thresholdTimestamp } })
       .toArray();
 
     for (const image of oldImages) {
-      const imagePath = image.image_path;
-
-      // Удаляем изображение из сервера
+      const imagePath = path.join(UPLOADS_DIR, path.basename(image.image_path));
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
-
-      // Удаляем запись из базы данных
       await collection.deleteOne({ _id: image._id });
     }
+  } catch (error) {
+    console.error("Failed to delete old images:", error);
   } finally {
     await client.close();
   }
 }
 
-// Запуск функции удаления старых изображений по расписанию
+/* CRON JOB TO DELETE OLD FILES */
 cron.schedule(
   "0 3 * * *",
   () => {
@@ -186,20 +174,19 @@ cron.schedule(
 /* START FUNCTION */
 async function start() {
   try {
-    await mongoose
-      .connect(MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
-      .then(() => console.log("Mongo db connected successfully"))
-      .catch((err) => console.log(err));
+    await mongoose.connect(MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log("MongoDB connected successfully");
 
     app.listen(PORT, (err) => {
-      if (err) return console.log("App crashed: ", err);
-      console.log(`Server started successfully! Port: ${PORT}`);
+      if (err) return console.error("App crashed: ", err);
+      console.log(`Server started on port ${PORT}`);
     });
   } catch (err) {
-    console.log(err);
+    console.error("Server start failed:", err);
   }
 }
 
