@@ -16,10 +16,10 @@ pipeline {
             steps {
                 sh '''
                     npm i ci
-                    sudo pm2 stop server || true
-                    sudo pm2 delete server || true
+                    pm2 stop server || true
+                    pm2 delete server || true
 
-                    sudo MONGO_URI=$MONGO_URI \
+                    MONGO_URI=$MONGO_URI \
                          PORT=$PORT \
                          SECRET=$SECRET \
                          EMAIL=$EMAIL \
