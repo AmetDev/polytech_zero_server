@@ -32,7 +32,8 @@ const app = express();
 /* CONSTANTS */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
-const UPLOADS_DIR = "/home/jenkins";
+const UPLOADS_DIR = "/home/jenkins"; // Физический путь
+const PUBLIC_UPLOAD_PATH = "uploads"; // Публичный URL
 
 /* MIDDLEWARES */
 app.use(express.json({ limit: "50mb" }));
@@ -61,7 +62,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 /* STATIC FILES */
-app.use("/uploads", express.static(UPLOADS_DIR));
+app.use(`/${PUBLIC_UPLOAD_PATH}`, express.static(UPLOADS_DIR));
 
 /* ROUTES */
 app.get("/", (req, res) => {
@@ -76,7 +77,7 @@ app.post(
   async (req, res) => {
     try {
       if (req.file) {
-        const pdfUrl = `/uploads/${req.file.filename}`;
+        const pdfUrl = `${PUBLIC_UPLOAD_PATH}/${req.file.filename}`;
         const newPdf = new pdfModel({
           filename: req.file.filename,
           path: pdfUrl,
@@ -101,7 +102,7 @@ app.post(
   async (req, res) => {
     try {
       if (req.file) {
-        const imageUrl = `/uploads/${req.file.filename}`;
+        const imageUrl = `${PUBLIC_UPLOAD_PATH}/${req.file.filename}`;
         const newImage = new Image({
           filename: req.file.filename,
           path: imageUrl,
@@ -118,6 +119,7 @@ app.post(
   }
 );
 
+/* API ROUTERS */
 app.use("/auth", userRouter);
 app.use("/speciality", specialityRouter);
 app.use("/post", postRouter);
@@ -147,9 +149,9 @@ async function deleteOldImages(daysThreshold = 365) {
       .toArray();
 
     for (const image of oldImages) {
-      const imagePath = path.join(UPLOADS_DIR, path.basename(image.image_path));
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      const fullImagePath = path.join(UPLOADS_DIR, path.basename(image.image_path));
+      if (fs.existsSync(fullImagePath)) {
+        fs.unlinkSync(fullImagePath);
       }
       await collection.deleteOne({ _id: image._id });
     }
