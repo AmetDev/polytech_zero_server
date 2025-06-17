@@ -32,7 +32,7 @@ const app = express();
 /* CONSTANTS */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
-const UPLOADS_DIR = "/home/jenkins"; // Физический путь
+const UPLOADS_DIR = "/home/jenkins/"; // Физический путь
 const PUBLIC_UPLOAD_PATH = "uploads"; // Публичный URL
 
 /* MIDDLEWARES */
