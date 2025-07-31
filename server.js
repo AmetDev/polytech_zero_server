@@ -22,6 +22,7 @@ import scheduleRouter from "./routes/ScheduleRoutes.js";
 import specialityRouter from "./routes/SpecialtiesRoutes.js";
 import userRouter from "./routes/UserRoutes.js";
 import AdmissionRouter from "./routes/Admission.js";
+import LinksMainRouter from "./routes/LinkMain.js";
 import checkAuth from "./utils/checkAuth.js";
 import checkUserIsAdmin from "./utils/checkUserIsAdmin.js";
 
@@ -31,7 +32,7 @@ const app = express();
 /* CONSTANTS */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
-const UPLOADS_DIR = "/home/newuploads/uploads";
+const UPLOADS_DIR = "./uploads";
 
 /* Ensure the uploads directory exists */
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -135,7 +136,7 @@ app.use("/schedule", scheduleRouter);
 app.use("/linker", LinkHeader);
 app.use("/files", SaveFilesRouter);
 app.use("/admission", AdmissionRouter);
-
+app.use("/linkglobal", LinksMainRouter)
 const client = new MongoClient(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
