@@ -28,6 +28,7 @@ import checkUserIsAdmin from "./utils/checkUserIsAdmin.js";
 import posterRouter from "./routes/PosterRoutes.js"
 import posterSlidesRouter from "./routes/PosterSlidesRoutes.js";
 import EssentialLinkRouter from './routes/EssentialLinkRoutes.js'
+import MinistryRouter from './routes/MinistriesRoutes.js'
 dotenv.config({ path: "./.env" });
 const app = express();
 
@@ -142,6 +143,7 @@ app.use("/linkglobal", LinksMainRouter)
 app.use("/posterall", posterRouter); // Added Poster route
 app.use("/slidesall", posterSlidesRouter);
 app.use('/essential', EssentialLinkRouter)
+app.use('/minmain', MinistryRouter)
 const client = new MongoClient(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
