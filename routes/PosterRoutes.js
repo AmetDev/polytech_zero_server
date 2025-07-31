@@ -6,7 +6,7 @@ import multer from "multer";
 import path from "path";
 
 const router = express.Router();
-const UPLOADS_DIR = "/home/newuploads/uploads";
+const UPLOADS_DIR = process.env.UPLOADS_DIR;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

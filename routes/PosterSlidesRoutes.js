@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs"; // Added for file system operations
 
 const router = express.Router();
-const UPLOADS_DIR = "/home/newuploads/uploads";
+const UPLOADS_DIR = process.env.UPLOADS_DIR;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

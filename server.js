@@ -33,7 +33,7 @@ const app = express();
 /* CONSTANTS */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
-const UPLOADS_DIR = "/home/newuploads/uploads";
+const UPLOADS_DIR = process.env.UPLOADS_DIR;
 
 /* Ensure the uploads directory exists */
 if (!fs.existsSync(UPLOADS_DIR)) {

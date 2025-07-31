@@ -24,6 +24,7 @@ pipeline {
                          SECRET=$SECRET \
                          EMAIL=$EMAIL \
                          PASS=$PASS \
+                         UPLOADS_DIR=$UPLOADS_DIR \
                          CI=true \
                          pm2 start server.js --name server
                 '''
