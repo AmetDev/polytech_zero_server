@@ -27,6 +27,7 @@ pipeline {
                          UPLOADS_DIR=$UPLOADS_DIR \
                          CI=true \
                          pm2 start server.js --name server
+                         pm2 save
                 '''
             }
         }
