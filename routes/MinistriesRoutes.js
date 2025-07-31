@@ -69,6 +69,7 @@ router.post("/ministries", checkAuth, checkUserIsAdmin, async (req, res) => {
 router.put("/ministries", checkAuth, checkUserIsAdmin, async (req, res) => {
   try {
     const { id, url, text, sourceImage } = req.query;
+    console.log("id, url, text, sourceImage", id, url, text, sourceImage)
     if (!id) {
       return res.status(400).json({ message: "ID is required for update" });
     }
