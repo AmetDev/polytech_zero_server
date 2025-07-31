@@ -26,13 +26,14 @@ import LinksMainRouter from "./routes/LinkMain.js";
 import checkAuth from "./utils/checkAuth.js";
 import checkUserIsAdmin from "./utils/checkUserIsAdmin.js";
 import posterRouter from "./routes/PosterRoutes.js"
+import posterSlidesRouter from "./routes/PosterSlidesRoutes.js";
 dotenv.config({ path: "./.env" });
 const app = express();
 
 /* CONSTANTS */
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
-const UPLOADS_DIR = "/home/newuploads/uploads";;
+const UPLOADS_DIR = "/home/newuploads/uploads";
 
 /* Ensure the uploads directory exists */
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -138,7 +139,7 @@ app.use("/files", SaveFilesRouter);
 app.use("/admission", AdmissionRouter);
 app.use("/linkglobal", LinksMainRouter)
 app.use("/posterall", posterRouter); // Added Poster route
-
+app.use("/slidesall", posterSlidesRouter);
 const client = new MongoClient(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
