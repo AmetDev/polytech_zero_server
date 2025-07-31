@@ -25,7 +25,7 @@ import AdmissionRouter from "./routes/Admission.js";
 import LinksMainRouter from "./routes/LinkMain.js";
 import checkAuth from "./utils/checkAuth.js";
 import checkUserIsAdmin from "./utils/checkUserIsAdmin.js";
-
+import posterRouter from "./routes/PosterRoutes.js"
 dotenv.config({ path: "./.env" });
 const app = express();
 
@@ -137,6 +137,8 @@ app.use("/linker", LinkHeader);
 app.use("/files", SaveFilesRouter);
 app.use("/admission", AdmissionRouter);
 app.use("/linkglobal", LinksMainRouter)
+app.use("/posterall", posterRouter); // Added Poster route
+
 const client = new MongoClient(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
