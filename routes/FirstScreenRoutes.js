@@ -10,7 +10,7 @@ const FirstScreenSchema = new mongoose.Schema({
     type: String,
     required: [true, "College name is required"],
     trim: true,
-    maxlength: [100, "College name cannot exceed 100 characters"],
+    maxlength: [1000, "College name cannot exceed 100 characters"],
   },
   buttonLink: {
     type: String,
